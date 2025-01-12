@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="(OutputPath)Refine.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
-        <None Include="(OutputPath)Refine.Generators.pdb" Pack="true" PackagePath="analyzers/dotnet/cs" />
+        <None Include="$(TargetDir)Refine.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+        <None Include="$(TargetDir)Refine.Generators.pdb" Pack="true" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
 </Project>
