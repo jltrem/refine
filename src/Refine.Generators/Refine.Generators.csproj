@@ -9,7 +9,7 @@
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Refine.Generators</PackageId>
-        <Version>0.0.2</Version>
+        <Version>0.0.4</Version>
         <Authors>Joe Tremblay</Authors>
         <Company />
         <Copyright>Copyright © 2025 Joe Tremblay</Copyright>
