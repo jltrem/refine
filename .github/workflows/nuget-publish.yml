@@ -1,0 +1,36 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Triggers publishing when a new version tag is pushed
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build projects
+      run: dotnet build --configuration Release
+
+    - name: Pack Refine
+      run: dotnet pack src/Refine/Refine.csproj --configuration Release --output ./packages
+
+    - name: Pack Refine.Generators
+      run: dotnet pack src/Refine.Generators/Refine.Generators.csproj --configuration Release --output ./packages
+
+    - name: Publish to NuGet.org
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push ./packages/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

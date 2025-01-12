@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{35C9F900-6C38-4682-930A-E144AA1AB0F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refine", "src\Refine\Refine.csproj", "{6BC80A01-DF5F-4137-9BCB-F344263E49AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refine.RoslynCodeGen", "src\Refine.RoslynCodeGen\Refine.RoslynCodeGen.csproj", "{4EF9B1DD-75DB-4625-B9DE-DDA7C61AC4E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refine.Generators", "src\Refine.Generators\Refine.Generators.csproj", "{4EF9B1DD-75DB-4625-B9DE-DDA7C61AC4E7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C5BF83CD-2748-4D40-AE0A-18FBB66758DD}"
 EndProject

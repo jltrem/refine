@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Refine.RoslynCodeGen
+namespace Refine.Generators
 {
     [Generator]
     public class RefinedTypeGenerator : IIncrementalGenerator
@@ -26,10 +26,9 @@ namespace Refine.RoslynCodeGen
 
             context.RegisterSourceOutput(compilationAndWrappers, (ctx, source) =>
             {
-                // Check if the collection is empty
+                // Emit a diagnostic if no targets were found
                 if (!source.Right.Any())
                 {
-                    // No targets found, you can handle this (e.g., emit a diagnostic)
                     ctx.ReportDiagnostic(Diagnostic.Create(
                         new DiagnosticDescriptor(
                             "GEN001",
