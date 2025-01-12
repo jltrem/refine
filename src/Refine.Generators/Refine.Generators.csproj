@@ -9,7 +9,7 @@
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Refine.Generators</PackageId>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <Authors>Joe Tremblay</Authors>
         <Company />
         <Copyright>Copyright © 2025 Joe Tremblay</Copyright>
@@ -27,5 +27,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="(OutputPath)Refine.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+        <None Include="(OutputPath)Refine.Generators.pdb" Pack="true" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
 </Project>
