@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C5BF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefinedType.Console", "samples\RefinedType.Console\RefinedType.Console.csproj", "{1EE04579-9887-42EE-80E7-58DC1794DC37}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CCA12EB3-686D-4EB9-8A81-FDE1FCFCB01D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Refine.Generators.Tests", "tests\Refine.Generators.Tests\Refine.Generators.Tests.csproj", "{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +33,15 @@ Global
 		{1EE04579-9887-42EE-80E7-58DC1794DC37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EE04579-9887-42EE-80E7-58DC1794DC37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EE04579-9887-42EE-80E7-58DC1794DC37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6BC80A01-DF5F-4137-9BCB-F344263E49AE} = {35C9F900-6C38-4682-930A-E144AA1AB0F7}
 		{4EF9B1DD-75DB-4625-B9DE-DDA7C61AC4E7} = {35C9F900-6C38-4682-930A-E144AA1AB0F7}
 		{1EE04579-9887-42EE-80E7-58DC1794DC37} = {C5BF83CD-2748-4D40-AE0A-18FBB66758DD}
+		{7272CF6B-2F38-4E99-9E0C-A2DE4FBCC7C7} = {CCA12EB3-686D-4EB9-8A81-FDE1FCFCB01D}
 	EndGlobalSection
 EndGlobal
