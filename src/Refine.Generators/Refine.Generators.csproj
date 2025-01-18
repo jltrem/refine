@@ -15,11 +15,20 @@
         <Copyright>Copyright © 2025 Joe Tremblay</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Description>>Roslyn code generator for use with `Refine`</Description>
+        <Description>Roslyn code generator for use with `Refine`</Description>
         <PackageTags>validator;validate;validation;transformation;types;immutable;ddd;domain;dotnet;roslyn;codegen</PackageTags>
         <RepositoryUrl>https://github.com/jltrem/refine</RepositoryUrl>
         <PackageProjectUrl>https://github.com/jltrem/refine</PackageProjectUrl>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+        <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
@@ -27,6 +36,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0"/>
+        <PackageReference Include="MinVer" Version="6.0.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
