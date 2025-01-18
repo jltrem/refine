@@ -1,36 +1,72 @@
-name: Publish NuGet Packages
+name: CI Workflow
 
 on:
   push:
+    branches: # Run the workflow on pushes to these branches
+      - main
     tags:
-      - 'v*.*.*' # Triggers publishing when a new version tag is pushed
+      - 'v*.*.*' # Publish on new version tags
+  
+  pull_request: # Run the workflow on pull requests targeting main
+    branches:
+      - main
 
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
-    
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Build projects
-      run: dotnet build --configuration Release
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Pack Refine
-      run: dotnet pack src/Refine/Refine.csproj --configuration Release --output ./packages
+      - name: Build solution
+        run: dotnet build --configuration Debug --no-restore
 
-    - name: Pack Refine.Generators
-      run: dotnet pack src/Refine.Generators/Refine.Generators.csproj --configuration Release --output ./packages
+      - name: Run tests
+        run: dotnet test --configuration Debug --no-restore --no-build --logger "trx" --results-directory ./TestResults
 
-    - name: Publish to NuGet.org
-      env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: dotnet nuget push ./packages/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+      - name: Upload test results
+        if: always() # Ensures results are uploaded even if tests fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./TestResults/*.trx
+
+  publish:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') # Only run for tag pushes
+    needs: test # only run if test succeeds
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build projects
+        run: dotnet build --configuration Release
+
+      - name: Pack Refine
+        run: dotnet pack src/Refine/Refine.csproj --configuration Release --output ./packages
+
+      - name: Pack Refine.Generators
+        run: dotnet pack src/Refine.Generators/Refine.Generators.csproj --configuration Release --output ./packages
+
+      - name: Publish to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./packages/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
