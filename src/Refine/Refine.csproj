@@ -16,9 +16,25 @@
         <Copyright>Copyright © 2025 Joe Tremblay</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Description>>`Refine` simplifies the initialization of types with validated data</Description>
+        <Description>`Refine` simplifies the initialization of types with validated data</Description>
         <PackageTags>validator;validate;validation;transformation;types;immutable;ddd;domain;dotnet;roslyn;codegen</PackageTags>
         <RepositoryUrl>https://github.com/jltrem/refine</RepositoryUrl>
         <PackageProjectUrl>https://github.com/jltrem/refine</PackageProjectUrl>
     </PropertyGroup>
+
+    <PropertyGroup>
+        <MinVerTagPrefix>v</MinVerTagPrefix>
+        <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="MinVer" Version="6.0.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
 </Project>
