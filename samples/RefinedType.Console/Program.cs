@@ -7,6 +7,13 @@ public static class Program
         Console.WriteLine(StringWrapper.Create("howdy").Value);
 
         {
+            string raw = "\tJames T. Kirk ";
+            Console.WriteLine($"Raw:     '{raw}'");
+            var sut = FullName.Create("\tJames T. Kirk  ");
+            Console.WriteLine($"Refined: '{sut.Value}'");
+        }
+
+        {
             var sut = X10.Create(2);
             Console.WriteLine($"X10.Create(2) : {sut.Value}");
         }
