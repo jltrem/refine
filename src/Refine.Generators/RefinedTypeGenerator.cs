@@ -233,8 +233,8 @@ namespace {info.ClassNamespace}
         public static bool operator !=({info.ClassName}? wrapper, {targetType}? value) => !(wrapper == value);
         public static bool operator ==({targetType}? value, {info.ClassName}? wrapper) => wrapper == value;
         public static bool operator !=({targetType}? value, {info.ClassName}? wrapper) => !(wrapper == value);
-        public static implicit operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
-        public static implicit operator {info.ClassName}({targetType} value) => Create(value);
+        public static explicit operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
+        public static explicit operator {info.ClassName}({targetType} value) => Create(value);
     }}
 }}
 ";
