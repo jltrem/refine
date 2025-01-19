@@ -6,7 +6,8 @@ on:
       - main
     tags:
       - 'v*.*.*' # Publish on new version tags
-  
+      - 'gen-v*.*.*'
+
   pull_request: # Run the workflow on pull requests targeting main
     branches:
       - main
@@ -54,17 +55,24 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Determine Project to Publish
+        id: determine_project
+        run: |
+          # Extract project type from tag name
+          if [[ "${GITHUB_REF##*/}" == "gen-v"* ]]; then
+            echo "project=Refine.Generators" >> $GITHUB_ENV
+          else
+            echo "project=Refine" >> $GITHUB_ENV
+          fi
+
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build projects
-        run: dotnet build --configuration Release
+      - name: Build Project
+        run: dotnet build --configuration Release src/${{ env.project }}/${{ env.project }}.csproj
 
-      - name: Pack Refine
-        run: dotnet pack src/Refine/Refine.csproj --configuration Release --output ./packages
-
-      - name: Pack Refine.Generators
-        run: dotnet pack src/Refine.Generators/Refine.Generators.csproj --configuration Release --output ./packages
+      - name: Pack Project
+        run: dotnet pack src/${{ env.project }}/${{ env.project }}.csproj --configuration Release --output ./packages
 
       - name: Publish to NuGet.org
         env:
