@@ -46,7 +46,7 @@ public partial class FullName
 string raw = "\tJames T. Kirk ";
 Console.WriteLine($"Raw:     '{raw}'");
 
-var refined = FullName.Create("\tJames T. Kirk  ");
+var refined = FullName.Create(raw);
 Console.WriteLine($"Refined: '{refined.Value}'");
 ```
 ```
