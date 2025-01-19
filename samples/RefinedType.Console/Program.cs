@@ -9,8 +9,11 @@ public static class Program
         {
             string raw = "\tJames T. Kirk ";
             Console.WriteLine($"Raw:     '{raw}'");
-            var sut = FullName.Create("\tJames T. Kirk  ");
+            var sut = FullName.Create(raw);
             Console.WriteLine($"Refined: '{sut.Value}'");
+
+            var fn = (FullName)"Ian Jacob Tremblay";
+            Console.WriteLine($"'{fn.Value}'");
         }
 
         {
@@ -34,7 +37,7 @@ public static class Program
             try
             {
                 Exception? nullException = null;
-                NonNullException sut = nullException;
+                NonNullException sut = (NonNullException)nullException;
             }
             catch (ArgumentException e)
             {
@@ -54,14 +57,14 @@ public static class Program
         }
 
         {
-            BasketballScore sut = (76, 41);
+            var sut = (BasketballScore)(76, 41);
             Console.WriteLine(sut.Value);
         }
 
         {
             try
             {
-                BasketballScore sut = (76, -1);
+                var sut = (BasketballScore)(76, -1);
                 Console.WriteLine(sut.Value);
             }
             catch (ArgumentException e)
@@ -73,7 +76,7 @@ public static class Program
         {
             try
             {
-                BasketballScore sut = (-2, -1);
+                var sut = (BasketballScore)(-2, -1);
                 Console.WriteLine(sut.Value);
             }
             catch (ArgumentException e)
