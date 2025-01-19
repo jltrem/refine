@@ -3,6 +3,16 @@ using Refine;
 namespace Sample;
 
 [RefinedType(typeof(string))]
+public partial class FullName
+{
+    private static string Transform(string value) =>
+        value?.Trim() ?? "";
+        
+    private static bool TryValidate(string value) =>
+        !string.IsNullOrEmpty(value);
+}
+
+[RefinedType(typeof(string))]
 public partial class StringWrapper;
 
 [RefinedType(typeof(int))]
