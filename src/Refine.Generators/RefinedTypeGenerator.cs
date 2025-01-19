@@ -152,18 +152,6 @@ namespace Refine.Generators
         {
             foreach (var wrapper in wrappers)
             {
-                //var targetTypeSymbol = (INamedTypeSymbol)wrapper.TargetType;
-                //var isRecord = targetTypeSymbol.IsRecord;
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        "GEN002",
-                        "dump",
-                        $"{wrapper}",
-                        "SourceGenerator",
-                        DiagnosticSeverity.Warning,
-                        true),
-                    Location.None));
                 var sourceCode = GenerateWrapperSource(wrapper);
 
                 context.AddSource($"{wrapper.ClassName}.g.cs", SourceText.From(sourceCode, Encoding.UTF8));

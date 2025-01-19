@@ -10,7 +10,7 @@
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Refine</PackageId>
-        <Version>0.0.4</Version>
+        <Version>0.0.0</Version>
         <Authors>Joe Tremblay</Authors>
         <Company />
         <Copyright>Copyright © 2025 Joe Tremblay</Copyright>
@@ -20,6 +20,7 @@
         <PackageTags>validator;validate;validation;transformation;types;immutable;ddd;domain;dotnet;roslyn;codegen</PackageTags>
         <RepositoryUrl>https://github.com/jltrem/refine</RepositoryUrl>
         <PackageProjectUrl>https://github.com/jltrem/refine</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <PropertyGroup>
