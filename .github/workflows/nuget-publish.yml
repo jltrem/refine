@@ -69,7 +69,7 @@ jobs:
         run: dotnet restore
 
       - name: Build Project
-        run: dotnet build --configuration Release src/${{ env.project }}/${{ env.project }}.csproj
+        run: dotnet build --configuration Release # src/${{ env.project }}/${{ env.project }}.csproj
 
       - name: Pack Project
         run: dotnet pack src/${{ env.project }}/${{ env.project }}.csproj --configuration Release --output ./packages
