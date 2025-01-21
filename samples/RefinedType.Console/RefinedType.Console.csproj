@@ -12,9 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Refine\Refine.csproj" />
-
-    <ProjectReference Include="..\..\src\Refine.Generators\Refine.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="Refine" Version="0.0.9-preview.0.2" />
+    <PackageReference Include="Refine.Generators" Version="0.0.9-preview.0.2" />
   </ItemGroup>
+
 
 </Project>

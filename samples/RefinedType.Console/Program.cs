@@ -1,4 +1,7 @@
-﻿namespace Sample;
+﻿using System.Reflection;
+using Refine;
+
+namespace Sample;
 
 public static class Program
 {
