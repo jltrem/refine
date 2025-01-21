@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Refine" Version="0.0.9-preview.0.3" />
-    <PackageReference Include="Refine.Generators" Version="0.0.9-preview.0.3" />
+    <PackageReference Include="Refine.Generators" Version="0.0.8" />
   </ItemGroup>
 
 
