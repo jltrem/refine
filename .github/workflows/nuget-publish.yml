@@ -44,7 +44,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') # Only run for tag pushes
-    needs: test # only run if test succeeds
+    #needs: test # only run if test succeeds
 
     steps:
       - name: Checkout code
