@@ -334,21 +334,19 @@ public class RefinedTypeGenerator : IIncrementalGenerator
             context.AddSource($"{wrapper.ClassName}.g.cs", SourceText.From(sourceCode, Encoding.UTF8));
         }
     }
-
+    
     private static string GenerateWrapperSource(WrapperTypeInfo info)
     {
         string targetType = info.TargetTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         if (string.IsNullOrEmpty(targetType))
             throw new InvalidOperationException("Target type cannot be resolved.");
 
+
         string usingTargetNamespace =
             info.TargetNamespace != info.ClassNamespace && !string.IsNullOrEmpty(info.TargetNamespace)
                 ? $"using {info.TargetNamespace};"
                 : "";
             
-        string equalsLogic = info.TargetHasEquatableT
-            ? "Value.Equals(other.Value)"
-            : $"EqualityComparer<{targetType}>.Default.Equals(Value, other.Value)";
 
         string validateCall = info.HasValidate || info.HasTryValidate
             ? "Validate(value);"
@@ -413,9 +411,9 @@ namespace {info.ClassNamespace}
         }}
         {validateMethod}
         {tryCreateMethod}
+        {MakeToStringMethod(info)}
+        {MakeEqualsMethods(info, targetType)}
         
-        public override bool Equals(object? obj) => obj is {info.ClassName} other && {equalsLogic};
-        public override int GetHashCode() => Value.GetHashCode();
         public static bool operator ==({info.ClassName}? wrapper, {targetType}? value) => wrapper?.Value.Equals(value) ?? value is null;
         public static bool operator !=({info.ClassName}? wrapper, {targetType}? value) => !(wrapper == value);
         public static bool operator ==({targetType}? value, {info.ClassName}? wrapper) => wrapper == value;
@@ -425,6 +423,31 @@ namespace {info.ClassNamespace}
     }}
 }}
 ";
+    }
+
+    private static string MakeToStringMethod(WrapperTypeInfo info)
+    {
+        string toStringMethod = info.Options.IsSet(MethodOptions.ToString)
+            ? @"
+// MethodOptions.ToString
+public override string ToString() => Value.ToString();"
+            : "";
+        return toStringMethod;
+    }
+
+    private static string MakeEqualsMethods(WrapperTypeInfo info, string targetType)
+    {
+        string equalsLogic = info.TargetHasEquatableT
+            ? "Value.Equals(other.Value)"
+            : $"EqualityComparer<{targetType}>.Default.Equals(Value, other.Value)";
+
+        string equalsMethods = info.Options.IsSet(MethodOptions.Equals)
+            ? $@"
+// MethodOptions.Equals
+public override bool Equals(object? obj) => obj is {info.ClassName} other && {equalsLogic};
+public override int GetHashCode() => Value.GetHashCode();"
+            : "";
+        return equalsMethods;
     }
 
     private static string GetNamespace(SyntaxNode node)
@@ -459,4 +482,11 @@ internal record WrapperTypeInfo
     public  bool TargetHasComparable { get; set; }
     public  bool TargetHasComparableT { get; set; }
     public  bool TargetHasEquatableT { get; set; }
+}
+
+internal static class OptionsExtensions
+{
+    
+    public static bool IsSet(this MethodOptions options, MethodOptions flag) => (options & flag) == flag;
+
 }
