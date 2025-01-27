@@ -51,7 +51,7 @@ public enum MethodOptions : ushort
     /// </summary>
     ImplicitConversion = 1 << 7,
 
-    Default = ToString | Equals | Equatable | EqualityOperators | Comparable | ComparisonOperators
+    Default = ToString | Equals | Equatable | EqualityOperators | Comparable | ComparisonOperators | ExplicitConversion
 }
 
 [AttributeUsage(AttributeTargets.Class)]
