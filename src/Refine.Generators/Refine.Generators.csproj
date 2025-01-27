@@ -45,7 +45,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Refine" Version="0.0.9-preview.0.4" PrivateAssets="all" />
+        <PackageReference Include="Refine" Version="0.0.9-preview.0.5" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>

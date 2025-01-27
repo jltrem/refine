@@ -388,6 +388,9 @@ public class RefinedTypeGenerator : IIncrementalGenerator
 
 operators:
 {info.TargetHasOperators.Aggregate(new StringBuilder(), (sb, kv) => sb.AppendLine($" - {kv.Key}: {kv.Value}"), sb => sb.ToString())}
+
+MethodOptions:
+{MakeOptionsComment(info)}
 */
 ";
 
@@ -413,15 +416,53 @@ namespace {info.ClassNamespace}
         {tryCreateMethod}
         {MakeToStringMethod(info)}
         {MakeEqualsMethods(info, targetType)}
+        {MakeCastOperators(info, targetType)}
         
         public static bool operator ==({info.ClassName}? wrapper, {targetType}? value) => wrapper?.Value.Equals(value) ?? value is null;
         public static bool operator !=({info.ClassName}? wrapper, {targetType}? value) => !(wrapper == value);
         public static bool operator ==({targetType}? value, {info.ClassName}? wrapper) => wrapper == value;
         public static bool operator !=({targetType}? value, {info.ClassName}? wrapper) => !(wrapper == value);
-        public static explicit operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
-        public static explicit operator {info.ClassName}({targetType} value) => Create(value);
     }}
 }}
+";
+    }
+
+    private static string MakeOptionsComment(WrapperTypeInfo info)
+    {
+        bool toString = info.Options.IsSet(MethodOptions.ToString);
+        bool equals = info.Options.IsSet(MethodOptions.Equals);
+        bool equatable = info.Options.IsSet(MethodOptions.Equatable);
+        bool equalityOperators = info.Options.IsSet(MethodOptions.EqualityOperators);
+        bool comparable = info.Options.IsSet(MethodOptions.Comparable);
+        bool comparisonOperators = info.Options.IsSet(MethodOptions.ComparisonOperators);
+        bool castExplicit = info.Options.IsSet(MethodOptions.ExplicitConversion);
+        bool castImplicit = info.Options.IsSet(MethodOptions.ImplicitConversion);
+        
+        return $@"
+* ToString = {toString}
+* Equals = {equals}
+* Equatable = {equatable}
+* EqualityOperators = {equalityOperators}
+* Comparable = {comparable}
+* ComparisonOperators = {comparisonOperators}
+* ExplicitConversion = {castExplicit}
+* ImplicitConversion = {castImplicit}
+";
+    }
+
+    private static string MakeCastOperators(WrapperTypeInfo info, string targetType)
+    {
+        bool kindExplicit = info.Options.IsSet(MethodOptions.ExplicitConversion);
+        bool kindImplicit = info.Options.IsSet(MethodOptions.ImplicitConversion);
+
+        if (!kindExplicit && !kindImplicit) return "";
+
+        MethodOptions kindComment = kindExplicit ? MethodOptions.ExplicitConversion : MethodOptions.ImplicitConversion;
+        string kindKeyword = kindExplicit ? "explicit" : "implicit";
+        return $@"
+// MethodOptions.{kindComment}
+public static {kindKeyword} operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
+public static {kindKeyword} operator {info.ClassName}({targetType} value) => Create(value);
 ";
     }
 

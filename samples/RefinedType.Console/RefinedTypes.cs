@@ -3,7 +3,7 @@ using Refine;
 
 namespace Sample;
 
-[RefinedType(typeof(string), MethodOptions.ComparisonOperators)]
+[RefinedType(typeof(string), MethodOptions.ComparisonOperators | MethodOptions.ExplicitConversion)]
 public partial class FullName
 {
     private static string Transform(string value) =>
