@@ -163,11 +163,10 @@ public class RefinedTypeGenerator : IIncrementalGenerator
             .Cast<ComparisonOperators>()
             .ToArray();
     
-    public static bool IsPrimitiveType(ITypeSymbol typeSymbol)
+    public static bool IsPrimitiveSupportingAllComparisonOperators(ITypeSymbol typeSymbol)
     {
         return typeSymbol.SpecialType switch
         {
-            SpecialType.System_Boolean => true,    // bool
             SpecialType.System_Byte => true,       // byte
             SpecialType.System_SByte => true,      // sbyte
             SpecialType.System_Int16 => true,      // short
@@ -176,28 +175,35 @@ public class RefinedTypeGenerator : IIncrementalGenerator
             SpecialType.System_UInt32 => true,     // uint
             SpecialType.System_Int64 => true,      // long
             SpecialType.System_UInt64 => true,     // ulong
+
             SpecialType.System_Single => true,     // float
             SpecialType.System_Double => true,     // double
-            SpecialType.System_Char => true,       // char
-            SpecialType.System_String => true,     // string
             SpecialType.System_Decimal => true,    // decimal
+
+            SpecialType.System_Char => true,       // char
+            SpecialType.System_Enum => true,       // enum
             _ => false 
         };
     }
         
     public static Dictionary<ComparisonOperators, bool> DetermineOperators(ITypeSymbol targetTypeSymbol)
     {
-
-        
-        if (IsPrimitiveType(targetTypeSymbol))
+        if (IsPrimitiveSupportingAllComparisonOperators(targetTypeSymbol))
         {
             return _operators.ToDictionary(op => op, op => true);
         }
 
+        if (targetTypeSymbol.SpecialType is SpecialType.System_String or SpecialType.System_Boolean)
+        {
+            var dict = _operators.ToDictionary(op => op, _ => false);
+            dict[ComparisonOperators.op_Equality] = true;
+            dict[ComparisonOperators.op_Inequality] = true;
+            return dict;
+        }
         
         var methods = targetTypeSymbol
-            .GetMembers() // Get all members of the type
-            .OfType<IMethodSymbol>() // Filter only methods
+            .GetMembers() 
+            .OfType<IMethodSymbol>() 
             .Where(method => method.IsStatic && method.DeclaredAccessibility == Accessibility.Public);
 
         return _operators
@@ -245,7 +251,7 @@ public class RefinedTypeGenerator : IIncrementalGenerator
                         string classNamespace = GetNamespace(classDeclaration);
                         string targetNamespace = targetTypeSymbol.ContainingNamespace.ToDisplayString();
 
-                        string fullyQualifiedTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        //string fullyQualifiedTypeName = targetTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
                         //Type? targetType = Type.GetType(fullyQualifiedTypeName);
                         
 
@@ -256,9 +262,9 @@ public class RefinedTypeGenerator : IIncrementalGenerator
                         var compilation = context.SemanticModel.Compilation;
 
                         // Get the symbol of the interface type
-                        var interfaceSymbol = compilation.GetTypeByMetadataName(typeof(IComparable<>)?.FullName);
+                        var interfaceSymbol = compilation.GetTypeByMetadataName(typeof(IComparable<>).FullName!);
                         if (interfaceSymbol == null)
-                            throw new ArgumentException($"The provided interface '{typeof(IComparable<>)?.FullName}' could not be found in the compilation.");
+                            throw new ArgumentException($"The provided interface '{typeof(IComparable<>).FullName}' could not be found in the compilation.");
                         
                         return new WrapperTypeInfo
                         {
@@ -284,18 +290,6 @@ public class RefinedTypeGenerator : IIncrementalGenerator
 
         return null;
     }
-
-    private static bool ImplementsEquatable(ITypeSymbol typeSymbol)
-    {
-        return typeSymbol
-            .AllInterfaces
-            .Any(namedType =>
-            {
-                return namedType.Name == "IEquatable" &&
-                       namedType.TypeArguments.Any(t => t.Equals(typeSymbol, SymbolEqualityComparer.Default));
-            });
-    }
-
 
     private static bool HasMethod(IEnumerable<IMethodSymbol> methods, string methodName, ITypeSymbol parameterType,
         SpecialType? specialReturnType = SpecialType.None, ITypeSymbol? specificReturnType = null)
@@ -340,14 +334,12 @@ public class RefinedTypeGenerator : IIncrementalGenerator
         string targetType = info.TargetTypeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         if (string.IsNullOrEmpty(targetType))
             throw new InvalidOperationException("Target type cannot be resolved.");
-
-
+        
         string usingTargetNamespace =
             info.TargetNamespace != info.ClassNamespace && !string.IsNullOrEmpty(info.TargetNamespace)
                 ? $"using {info.TargetNamespace};"
                 : "";
-            
-
+        
         string validateCall = info.HasValidate || info.HasTryValidate
             ? "Validate(value);"
             : "";
@@ -356,75 +348,73 @@ public class RefinedTypeGenerator : IIncrementalGenerator
             ? "value = Transform(value);"
             : "";
 
-        string validateMethod = "";
-        if (info is { HasTryValidate: true, HasValidate: false })
-            validateMethod = $@"
-       private static void Validate({targetType} value)
-       {{
-           if (!TryValidate(value))
-               throw new ArgumentException(""Validation failed for the provided value."");
-       }}
-";
-
-        var tryCreateMethod = info.HasTryValidate
-            ? $@"
-        public static bool TryCreate({targetType} value, out {info.ClassName}? newValue)
-        {{   
-            {transformCall}
-            if (TryValidate(value))
-            {{
-                newValue = new {info.ClassName}(value);
-                return true;
-            }}
-            newValue = null;
-            return false;
-        }}
-    "
+        string validateMethod = (info is { HasTryValidate: true, HasValidate: false })
+            ? $$"""
+                private static void Validate({{targetType}} value)
+                {
+                   if (!TryValidate(value))
+                       throw new ArgumentException("Validation failed for the provided value.");
+                }
+                """
             : "";
 
-        var infoComment = $@"
-/*
-{info}
+        string tryCreateMethod = info.HasTryValidate
+            ? $$"""
+                public static bool TryCreate({{targetType}} value, out {{info.ClassName}}? newValue)
+                {   
+                    {{transformCall}}
+                    if (TryValidate(value))
+                    {
+                        newValue = new {{info.ClassName}}(value);
+                        return true;
+                    }
+                    newValue = null;
+                    return false;
+                }
+                """
+            : "";
 
-operators:
-{info.TargetHasOperators.Aggregate(new StringBuilder(), (sb, kv) => sb.AppendLine($" - {kv.Key}: {kv.Value}"), sb => sb.ToString())}
+        string infoComment =
+            $"""
+             /*
+             {info}
 
-MethodOptions:
-{MakeOptionsComment(info)}
-*/
-";
+             operators:
+             {info.TargetHasOperators.Aggregate(new StringBuilder(), (sb, kv) => sb.AppendLine($" - {kv.Key}: {kv.Value}"), sb => sb.ToString())}
 
-        return @$"
-// <auto-generated/>
-#nullable enable
-{infoComment}
-{usingTargetNamespace}
-namespace {info.ClassNamespace}
-{{
-    public partial class {info.ClassName}
-    {{
-        public {targetType} Value {{ get; private init; }}
-        private {info.ClassName}({targetType} value) => Value = value;
-        
-        public static {info.ClassName} Create({targetType} value)
-        {{
-            {transformCall}
-            {validateCall}
-            return new {info.ClassName}(value);
-        }}
-        {validateMethod}
-        {tryCreateMethod}
-        {MakeToStringMethod(info)}
-        {MakeEqualsMethods(info, targetType)}
-        {MakeCastOperators(info, targetType)}
-        
-        public static bool operator ==({info.ClassName}? wrapper, {targetType}? value) => wrapper?.Value.Equals(value) ?? value is null;
-        public static bool operator !=({info.ClassName}? wrapper, {targetType}? value) => !(wrapper == value);
-        public static bool operator ==({targetType}? value, {info.ClassName}? wrapper) => wrapper == value;
-        public static bool operator !=({targetType}? value, {info.ClassName}? wrapper) => !(wrapper == value);
-    }}
-}}
-";
+             MethodOptions:
+             {MakeOptionsComment(info)}
+             */
+             """;
+
+        return $$"""
+                 // <auto-generated/>
+                 #nullable enable
+                 {{infoComment}}
+                 {{usingTargetNamespace}}
+                 namespace {{info.ClassNamespace}}
+                 {
+                     public partial class {{info.ClassName}}
+                     {
+                         public {{targetType}} Value { get; private init; }
+                         private {{info.ClassName}}({{targetType}} value) => Value = value;
+                         
+                         public static {{info.ClassName}} Create({{targetType}} value)
+                         {
+                             {{transformCall}}
+                             {{validateCall}}
+                             return new {{info.ClassName}}(value);
+                         }
+                         {{validateMethod}}
+                         {{tryCreateMethod}}
+                         {{MakeToStringMethod(info)}}
+                         {{MakeEqualsMethods(info, targetType)}}
+                         {{MakeEqualityOperators(info, targetType)}}
+                         {{MakeComparisonOperators(info, targetType)}}
+                         {{MakeCastOperators(info, targetType)}}
+                     }
+                 }
+                 """;
     }
 
     private static string MakeOptionsComment(WrapperTypeInfo info)
@@ -438,16 +428,106 @@ namespace {info.ClassNamespace}
         bool castExplicit = info.Options.IsSet(MethodOptions.ExplicitConversion);
         bool castImplicit = info.Options.IsSet(MethodOptions.ImplicitConversion);
         
-        return $@"
-* ToString = {toString}
-* Equals = {equals}
-* Equatable = {equatable}
-* EqualityOperators = {equalityOperators}
-* Comparable = {comparable}
-* ComparisonOperators = {comparisonOperators}
-* ExplicitConversion = {castExplicit}
-* ImplicitConversion = {castImplicit}
-";
+        return $"""
+
+                * ToString = {toString}
+                * Equals = {equals}
+                * Equatable = {equatable}
+                * EqualityOperators = {equalityOperators}
+                * Comparable = {comparable}
+                * ComparisonOperators = {comparisonOperators}
+                * ExplicitConversion = {castExplicit}
+                * ImplicitConversion = {castImplicit}
+
+                """;
+    }
+
+    private static string MakeEqualityOperators(WrapperTypeInfo info, string targetType)
+    {
+        if (!info.Options.IsSet(MethodOptions.EqualityOperators)) return "";
+        
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_Equality, out bool equality);
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_Inequality, out bool inequality);
+
+        StringBuilder sb = new();
+        sb.AppendLine($"// MethodOptions.{MethodOptions.EqualityOperators}");
+        
+        if (equality)
+        {
+            sb.AppendLine(
+                $"public static bool operator ==({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? value is null : wrapper.Value == value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator ==({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? value is null : wrapper.Value == value;"
+            );
+        }
+
+        if (inequality)
+        {
+            sb.AppendLine(
+                $"public static bool operator !=({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? value is not null : wrapper.Value != value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator !=({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? value is not null : wrapper.Value != value;"
+            );
+        }
+        
+        return sb.ToString();
+    }
+
+    private static string MakeComparisonOperators(WrapperTypeInfo info, string targetType)
+    {
+        if (!info.Options.IsSet(MethodOptions.ComparisonOperators)) return "";
+        
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_GreaterThan, out bool gt);
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_GreaterThanOrEqual, out bool gte);
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_LessThan, out bool lt);
+        _ = info.TargetHasOperators.TryGetValue(ComparisonOperators.op_LessThanOrEqual, out bool lte);
+
+        StringBuilder sb = new();
+        sb.AppendLine($"// MethodOptions.{MethodOptions.ComparisonOperators}");
+        
+        if (gt)
+        {
+            sb.AppendLine(
+                $"public static bool operator >({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? false : value > wrapper.Value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator >({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? false : wrapper.Value > value;"
+            );
+        }
+
+        if (gte)
+        {
+            sb.AppendLine(
+                $"public static bool operator >=({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? value is not null : value > wrapper.Value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator >=({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? value is not null : wrapper.Value > value;"
+            );
+        }
+
+        if (lt)
+        {
+            sb.AppendLine(
+                $"public static bool operator <({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? false : value < wrapper.Value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator <({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? false : wrapper.Value < value;"
+            );
+        }
+
+        if (lte)
+        {
+            sb.AppendLine(
+                $"public static bool operator <=({targetType}? value, {info.ClassName}? wrapper) => (wrapper is null) ? value is not null : value <= wrapper.Value;"
+            );
+            sb.AppendLine(
+                $"public static bool operator <=({info.ClassName}? wrapper, {targetType}? value) => (wrapper is null) ? value is not null : wrapper.Value <= value;"
+            );
+        }
+
+        return sb.ToString();
     }
 
     private static string MakeCastOperators(WrapperTypeInfo info, string targetType)
@@ -459,19 +539,22 @@ namespace {info.ClassNamespace}
 
         MethodOptions kindComment = kindExplicit ? MethodOptions.ExplicitConversion : MethodOptions.ImplicitConversion;
         string kindKeyword = kindExplicit ? "explicit" : "implicit";
-        return $@"
-// MethodOptions.{kindComment}
-public static {kindKeyword} operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
-public static {kindKeyword} operator {info.ClassName}({targetType} value) => Create(value);
-";
+        return $"""
+
+                // MethodOptions.{kindComment}
+                public static {kindKeyword} operator {targetType}({info.ClassName} wrapper) => wrapper.Value;
+                public static {kindKeyword} operator {info.ClassName}({targetType} value) => Create(value);
+                """;
     }
 
     private static string MakeToStringMethod(WrapperTypeInfo info)
     {
         string toStringMethod = info.Options.IsSet(MethodOptions.ToString)
-            ? @"
-// MethodOptions.ToString
-public override string ToString() => Value.ToString();"
+            ? """
+
+              // MethodOptions.ToString
+              public override string ToString() => Value.ToString();
+              """
             : "";
         return toStringMethod;
     }
@@ -483,10 +566,12 @@ public override string ToString() => Value.ToString();"
             : $"EqualityComparer<{targetType}>.Default.Equals(Value, other.Value)";
 
         string equalsMethods = info.Options.IsSet(MethodOptions.Equals)
-            ? $@"
-// MethodOptions.Equals
-public override bool Equals(object? obj) => obj is {info.ClassName} other && {equalsLogic};
-public override int GetHashCode() => Value.GetHashCode();"
+            ? $"""
+
+               // MethodOptions.Equals
+               public override bool Equals(object? obj) => obj is {info.ClassName} other && {equalsLogic};
+               public override int GetHashCode() => Value.GetHashCode();
+               """
             : "";
         return equalsMethods;
     }
