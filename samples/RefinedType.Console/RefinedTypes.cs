@@ -1,8 +1,9 @@
+using System.Collections;
 using Refine;
 
 namespace Sample;
 
-[RefinedType(typeof(string))]
+[RefinedType(typeof(string), MethodOptions.ToString | MethodOptions.ComparisonOperators | MethodOptions.ExplicitConversion)]
 public partial class FullName
 {
     private static string Transform(string value) =>
@@ -11,6 +12,7 @@ public partial class FullName
     private static bool TryValidate(string value) =>
         !string.IsNullOrEmpty(value);
 }
+
 
 [RefinedType(typeof(string))]
 public partial class StringWrapper;
@@ -54,8 +56,10 @@ public partial class NonNullException
 
 public record Person(string FullName, int Age);
 
+
+
 [RefinedType(typeof(Person))]
-public partial class ValidatedPerson
+public partial class ValidatedPerson 
 {
     private static Person Transform(Person value) =>
         value with { FullName = value.FullName.Trim() };

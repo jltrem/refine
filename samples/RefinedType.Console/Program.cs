@@ -1,4 +1,7 @@
-﻿namespace Sample;
+﻿using System.Reflection;
+using Refine;
+
+namespace Sample;
 
 public static class Program
 {
@@ -10,20 +13,20 @@ public static class Program
             string raw = "\tJames T. Kirk ";
             Console.WriteLine($"Raw:     '{raw}'");
             var sut = FullName.Create(raw);
-            Console.WriteLine($"Refined: '{sut.Value}'");
+            Console.WriteLine($"Refined: '{sut}'");
 
-            var fn = (FullName)"Ian Jacob Tremblay";
-            Console.WriteLine($"'{fn.Value}'");
+            var fn = (FullName)"\tJohn Jacob Jingleheimer Schmidt\n";
+            Console.WriteLine($"'{fn}'");
         }
 
         {
             var sut = X10.Create(2);
-            Console.WriteLine($"X10.Create(2) : {sut.Value}");
+            Console.WriteLine($"X10.Create(2) : {sut}");
         }
 
         {
             var sut = NonNegative.Create(5);
-            Console.WriteLine($"StrictlyPositive sut = 1 : {sut.Value}");
+            Console.WriteLine($"StrictlyPositive sut = 1 : {sut}");
         }
 
         {
@@ -48,24 +51,24 @@ public static class Program
         {
             var sut = NonNullException.Create(new AggregateException("foobar"));
             Console.WriteLine(
-                $"NonNullException.Create(new AggregateException(\"foobar\")) : {Environment.NewLine}\t{sut}{Environment.NewLine}\t{sut.Value}");
+                $"NonNullException.Create(new AggregateException(\"foobar\")) : {Environment.NewLine}\t{sut}{Environment.NewLine}\t{sut}");
         }
 
         {
             var sut = ValidatedPerson.Create(new Person(" James Dean\t", 42));
-            Console.WriteLine(sut.Value);
+            Console.WriteLine(sut);
         }
 
         {
             var sut = (BasketballScore)(76, 41);
-            Console.WriteLine(sut.Value);
+            Console.WriteLine(sut);
         }
 
         {
             try
             {
                 var sut = (BasketballScore)(76, -1);
-                Console.WriteLine(sut.Value);
+                Console.WriteLine(sut);
             }
             catch (ArgumentException e)
             {
@@ -77,7 +80,7 @@ public static class Program
             try
             {
                 var sut = (BasketballScore)(-2, -1);
-                Console.WriteLine(sut.Value);
+                Console.WriteLine(sut);
             }
             catch (ArgumentException e)
             {

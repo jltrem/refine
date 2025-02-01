@@ -12,6 +12,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Refine.Generators\Refine.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\src\Refine\Refine.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true"  />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Include="xunit" Version="2.5.3"/>
@@ -20,11 +25,6 @@
 
     <ItemGroup>
         <Using Include="Xunit"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\src\Refine.Generators\Refine.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-      <ProjectReference Include="..\..\src\Refine\Refine.csproj" />
     </ItemGroup>
 
 </Project>
