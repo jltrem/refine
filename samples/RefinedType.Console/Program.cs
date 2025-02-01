@@ -15,7 +15,7 @@ public static class Program
             var sut = FullName.Create(raw);
             Console.WriteLine($"Refined: '{sut}'");
 
-            var fn = (FullName)"Ian Jacob Tremblay";
+            var fn = (FullName)"\tJohn Jacob Jingleheimer Schmidt\n";
             Console.WriteLine($"'{fn}'");
         }
 

@@ -56,8 +56,10 @@ public partial class NonNullException
 
 public record Person(string FullName, int Age);
 
+
+
 [RefinedType(typeof(Person))]
-public partial class ValidatedPerson
+public partial class ValidatedPerson 
 {
     private static Person Transform(Person value) =>
         value with { FullName = value.FullName.Trim() };
