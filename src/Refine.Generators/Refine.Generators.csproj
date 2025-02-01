@@ -55,7 +55,7 @@
     </ItemGroup>
 
     <Target Name="CopyRefineDependency" AfterTargets="Build">
-        <Copy SourceFiles="..\Refine\bin\$(Configuration)\netstandard2.0\Refine.dll"
+        <Copy SourceFiles="$(NuGetPackageRoot)refine\0.0.9-preview.0.5\lib\netstandard2.0\Refine.dll"
               DestinationFolder="$(TargetDir)" />
     </Target>
     
